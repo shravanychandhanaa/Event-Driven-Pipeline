@@ -1,0 +1,51 @@
+name: Deploy Lambda via CloudFormation
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  AWS_REGION: ap-south-1
+  S3_BUCKET: your-lambda-code-bucket
+  LAMBDA_CODE_KEY: data_processor.zip
+  STACK_NAME: event-driven-pipeline-stack
+  TEMPLATE_FILE: cloudformation-template.yaml
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Zip Lambda Function
+      run: |
+        zip -r ${{ env.LAMBDA_CODE_KEY }} data_processor.py
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Upload ZIP to S3
+      run: |
+        aws s3 cp ${{ env.LAMBDA_CODE_KEY }} s3://${{ env.S3_BUCKET }}/${{ env.LAMBDA_CODE_KEY }}
+
+    - name: Deploy CloudFormation Stack
+      run: |
+        aws cloudformation deploy \
+          --template-file ${{ env.TEMPLATE_FILE }} \
+          --stack-name ${{ env.STACK_NAME }} \
+          --capabilities CAPABILITY_NAMED_IAM \
+          --parameter-overrides \
+            LambdaCodeBucket=${{ env.S3_BUCKET }} \
+            LambdaCodeKey=${{ env.LAMBDA_CODE_KEY }}
