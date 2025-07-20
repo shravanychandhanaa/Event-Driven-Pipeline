@@ -2,10 +2,15 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: Event-Driven Data Processing Pipeline on AWS
 
 Resources:
-  DataBucket:
+  LambdaCodeBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: event-driven-data-bucket
+      BucketName: lambda-code-storage-shravani
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
 
   LambdaExecutionRole:
     Type: AWS::IAM::Role
@@ -43,7 +48,7 @@ Resources:
       Runtime: python3.9
       Role: !GetAtt LambdaExecutionRole.Arn
       Code:
-        S3Bucket: your-lambda-code-bucket
+        S3Bucket: lambda-code-storage-shravani
         S3Key: data_processor.zip
       Events:
         S3Event:

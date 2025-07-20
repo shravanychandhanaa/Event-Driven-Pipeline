@@ -7,10 +7,10 @@ on:
 
 env:
   AWS_REGION: ap-south-1
-  S3_BUCKET: your-lambda-code-bucket
+  S3_BUCKET: lambda-code-storage-shravani
   LAMBDA_CODE_KEY: data_processor.zip
   STACK_NAME: event-driven-pipeline-stack
-  TEMPLATE_FILE: cloudformation-template.yaml
+  TEMPLATE_FILE: cloudformationtemplate.yaml
 
 jobs:
   deploy:
